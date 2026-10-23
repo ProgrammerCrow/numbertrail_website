@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Trail — Connect Numbers. Find Your Trail.</title>
+  <meta name="description" content="A mindful, addictive number path puzzle. Connect neighboring tiles, hit the target sum, and explore endless stages, daily streaks, and 90-second sprints.">
+  <link rel="icon" type="image/png" href="assets/app_icon.png">
+  <link rel="apple-touch-icon" href="assets/app_icon.png">
+  
+  <!-- OpenGraph / Social Meta Tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Number Trail — Connect Numbers. Find Your Trail.">
+  <meta property="og:description" content="Start with a number, glide through neighboring tiles, and match the target sum. Calm focus, daily streaks, and 90s sprints.">
+  <meta property="og:image" content="assets/app_icon.png">
+  <meta name="twitter:card" content="summary">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0B0F19;
+      --card-bg: rgba(21, 28, 44, 0.78);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --accent-mint: #38E5A7;
+      --accent-cyan: #38BDF8;
+      --accent-purple: #A78BFA;
+      --accent-orange: #FFB84D;
+      --gradient-brand: linear-gradient(135deg, #A78BFA 0%, #38BDF8 50%, #38E5A7 100%);
+      --gradient-card: linear-gradient(180deg, rgba(30, 41, 67, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ambient Glow Effects */
+    .glow-circle {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(140px);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .glow-1 {
+      width: 650px; height: 650px; top: -200px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(167, 139, 250, 0.22) 0%, rgba(56, 189, 248, 0.12) 50%, transparent 70%);
+    }
+    .glow-2 {
+      width: 520px; height: 520px; bottom: 15%; right: -120px;
+      background: radial-gradient(circle, rgba(56, 229, 167, 0.15) 0%, transparent 70%);
+    }
+
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; width: 100%; }
+
+    /* Header & Navigation */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--card-border);
+    }
+    .nav-wrapper {
+      height: 72px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit;
+    }
+    .brand-icon {
+      width: 40px; height: 40px; border-radius: 11px;
+      box-shadow: 0 4px 16px rgba(167, 139, 250, 0.4);
+    }
+    .brand-name {
+      font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem;
+      transition: color 0.2s ease;
+    }
+    .nav-links a:hover { color: var(--accent-mint); }
+
+    /* Hero Section */
+    .hero {
+      padding-top: 140px; padding-bottom: 60px; text-align: center;
+    }
+    .pill-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 18px; border-radius: 9999px;
+      background: rgba(56, 229, 167, 0.08);
+      border: 1px solid rgba(56, 229, 167, 0.3);
+      color: var(--accent-mint); font-size: 0.85rem; font-weight: 700;
+      margin-bottom: 24px;
+      letter-spacing: 0.3px;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 900; letter-spacing: -1.8px; line-height: 1.15;
+      max-width: 860px; margin: 0 auto 20px;
+    }
+    .gradient-text {
+      background: var(--gradient-brand);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: 1.18rem; color: var(--text-muted);
+      max-width: 660px; margin: 0 auto 36px;
+    }
+
+    .cta-row {
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      flex-wrap: wrap; margin-bottom: 60px;
+    }
+    .appstore-badge {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 12px 26px; border-radius: 16px;
+      background: #000; border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff; text-decoration: none; font-weight: 700;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .appstore-badge:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-mint);
+    }
+    .appstore-badge svg { width: 26px; height: 26px; fill: currentColor; }
+    .appstore-text { text-align: left; }
+    .appstore-text span { display: block; font-size: 0.72rem; font-weight: 500; opacity: 0.8; }
+    .appstore-text strong { display: block; font-size: 1.1rem; line-height: 1.1; }
+
+    /* Interactive Demo Board Card */
+    .interactive-demo {
+      max-width: 480px; margin: 0 auto 80px;
+      background: var(--gradient-card);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(167, 139, 250, 0.15);
+      text-align: center;
+    }
+    .demo-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; padding: 14px 20px;
+      background: rgba(11, 15, 25, 0.6);
+      border-radius: 18px; border: 1px solid var(--card-border);
+    }
+    .demo-stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .demo-stat-value { font-size: 1.7rem; font-weight: 900; }
+    .demo-stat-target { color: var(--accent-mint); }
+    .demo-stat-current { color: var(--accent-cyan); }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .board-cell {
+      aspect-ratio: 1;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 800; color: #fff;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .board-cell:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.04);
+    }
+    .board-cell.selected {
+      background: linear-gradient(135deg, #7C5CFF 0%, #38BDF8 100%);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 16px rgba(124, 92, 255, 0.4);
+      color: #fff;
+    }
+    .demo-instruction {
+      font-size: 0.88rem; color: var(--text-muted); font-weight: 600;
+    }
+
+    /* Feature Grid */
+    .section-title {
+      text-align: center; font-size: 2.2rem; font-weight: 800;
+      letter-spacing: -1px; margin-bottom: 40px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px; margin-bottom: 90px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px; padding: 32px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(56, 229, 167, 0.35);
+    }
+    .card-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: rgba(56, 189, 248, 0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 20px;
+    }
+    .card h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 12px; color: #fff; }
+    .card p { color: var(--text-muted); font-size: 0.96rem; line-height: 1.6; }
+
+    /* Support / Contact Section */
+    .support-box {
+      background: var(--card-bg);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      border-radius: 28px; padding: 48px 32px; text-align: center;
+      max-width: 780px; margin: 0 auto 90px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+    .support-box h2 { font-size: 2rem; font-weight: 800; margin-bottom: 14px; }
+    .support-box p { color: var(--text-muted); margin-bottom: 28px; font-size: 1.05rem; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 32px; border-radius: 9999px;
+      background: var(--gradient-brand); color: #0B0F19;
+      font-weight: 800; text-decoration: none; font-size: 1rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 24px rgba(56, 229, 167, 0.35);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: auto;
+      border-top: 1px solid var(--card-border);
+      padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 0.92rem;
+      background: rgba(11, 15, 25, 0.6);
+    }
+    .footer-links {
+      display: flex; justify-content: center; gap: 24px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .footer-links a { color: var(--accent-mint); text-decoration: none; font-weight: 600; }
+    .footer-links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="glow-circle glow-1"></div>
+  <div class="glow-circle glow-2"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand">
+        <img src="assets/app_icon.png" alt="Number Trail App Icon" class="brand-icon">
+        <span class="brand-name">Number Trail</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#demo">How to Play</a>
+        <a href="#features">Features</a>
+        <a href="#support">Support</a>
+        <a href="privacy.html">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="pill-badge">✦ Minimalist Mental Math & Path Puzzle</div>
+      <h1>Connect Numbers.<br><span class="gradient-text">Find Your Trail.</span></h1>
+      <p class="hero-subtitle">
+        Touch a number, glide through neighboring tiles, and match the target sum. Designed for calm focus, daily streaks, and quick 90-second mental sprints—100% offline.
+      </p>
+
+      <div class="cta-row">
+        <a href="#support" class="appstore-badge">
+          <svg viewBox="0 0 170 170">
+            <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.6-7.77-11.71-14.19-5.55-8.68-10.02-18.66-13.41-29.93-3.39-11.28-5.08-22.12-5.08-32.53 0-14.22 3.65-25.99 10.95-35.31 7.3-9.33 16.58-14.07 27.84-14.22 5.11 0 10.59 1.34 16.44 4.02 5.85 2.68 9.77 4.09 11.76 4.23 1.58-.27 5.67-1.74 12.28-4.41 6.61-2.67 12.18-3.86 16.71-3.56 12.56.88 22.36 5.48 29.39 13.8-10.99 6.66-16.36 15.77-16.11 27.34.27 9.07 3.68 16.63 10.23 22.68 6.55 6.05 14.37 9.49 23.47 10.33-2.22 6.53-4.85 13.3-7.89 20.31zM119.22 33.72c0-7.39 2.65-14.25 7.95-20.57 5.3-6.33 11.83-10.38 19.59-12.15.22 1.31.33 2.51.33 3.6 0 7.33-2.73 14.3-8.19 20.91-5.46 6.61-12.06 10.53-19.8 11.76-.11-1.09-.16-2.2-.16-3.33z"/>
+          </svg>
+          <div class="appstore-text">
+            <span>Download on the</span>
+            <strong>App Store</strong>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Mini Interactive Playable Demo -->
+    <section id="demo" class="interactive-demo">
+      <div class="demo-header">
+        <div>
+          <div class="demo-stat-label">Target</div>
+          <div class="demo-stat-value demo-stat-target" id="demo-target">10</div>
+        </div>
+        <div>
+          <div class="demo-stat-label">Your Sum</div>
+          <div class="demo-stat-value demo-stat-current" id="demo-sum">0</div>
+        </div>
+      </div>
+      <div class="board-grid">
+        <div class="board-cell" data-val="2" onclick="toggleCell(this)">2</div>
+        <div class="board-cell" data-val="3" onclick="toggleCell(this)">3</div>
+        <div class="board-cell" data-val="1" onclick="toggleCell(this)">1</div>
+        <div class="board-cell" data-val="5" onclick="toggleCell(this)">5</div>
+        <div class="board-cell" data-val="4" onclick="toggleCell(this)">4</div>
+        <div class="board-cell" data-val="2" onclick="toggleCell(this)">2</div>
+        <div class="board-cell" data-val="6" onclick="toggleCell(this)">6</div>
+        <div class="board-cell" data-val="1" onclick="toggleCell(this)">1</div>
+        <div class="board-cell" data-val="3" onclick="toggleCell(this)">3</div>
+      </div>
+      <p class="demo-instruction" id="demo-status">Tap numbers to reach exactly 10! (e.g. 2 → 3 → 5 = 10)</p>
+    </section>
+
+    <!-- Features Section -->
+    <h2 class="section-title">Pure Gameplay. No Fluff.</h2>
+    <section id="features" class="grid">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Fair Energy Economy</h3>
+        <p>Solving puzzles costs 0 energy! Play uninterrupted as long as you find the path. Energy drops only on mistakes and replenishes every 2 minutes.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗺️</div>
+        <h3>Endless 25-Level Chapters</h3>
+        <p>Progress through structured stages with evolving grid dimensions, exact-length constraints, and mandatory checkpoint stops.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📅</div>
+        <h3>Daily Trail & Weekly Journey</h3>
+        <p>A fresh handcrafted puzzle every morning. Maintain your streak, complete 3 daily goals, and conquer the 7-day weekly roadmap.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⏱️</div>
+        <h3>90-Second Sprint</h3>
+        <p>A high-tempo mental reflex workout. How many valid number paths can you chain together before the 90-second timer hits zero?</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎨</div>
+        <h3>100% Free Customization</h3>
+        <p>Unlock elegant midnight, ocean, and sunset themes alongside pebble, rounded, and cut tile styles completely free—no paywalls.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">✈️</div>
+        <h3>Offline & Privacy-First</h3>
+        <p>No user accounts, no tracking servers, and no mandatory login. All progress stays safely on your device, ready to play anywhere.</p>
+      </div>
+    </section>
+
+    <!-- Support Section -->
+    <section id="support" class="support-box">
+      <h2>Support & Community</h2>
+      <p>Have feedback, found a bug, or want to suggest new puzzle mechanics? We'd love to hear from you!</p>
+      <a href="mailto:support@programmercrow.com" class="btn">
+        ✉️ Contact Support (support@programmercrow.com)
+      </a>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <span>•</span>
+      <a href="privacy.html">Privacy Policy</a>
+      <span>•</span>
+      <a href="mailto:support@programmercrow.com">Support</a>
+      <span>•</span>
+      <a href="https://github.com/ProgrammerCrow/NumberTrail" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+    <div>&copy; 2026 ProgrammerCrow. All rights reserved. Number Trail™ — Bundle ID: com.turkmendigital.numbertrail.app</div>
+  </footer>
+
+  <script>
+    let currentSum = 0;
+    const target = 10;
+    const sumEl = document.getElementById('demo-sum');
+    const statusEl = document.getElementById('demo-status');
+
+    function toggleCell(cell) {
+      const val = parseInt(cell.getAttribute('data-val'));
+      if (cell.classList.contains('selected')) {
+        cell.classList.remove('selected');
+        currentSum -= val;
+      } else {
+        cell.classList.add('selected');
+        currentSum += val;
+      }
+      sumEl.innerText = currentSum;
+
+      if (currentSum === target) {
+        statusEl.innerText = '🎉 Target hit! Exactly 10! Clean trail found!';
+        statusEl.style.color = 'var(--accent-mint)';
+      } else if (currentSum > target) {
+        statusEl.innerText = '⚠️ Over the target! Tap a cell to deselect.';
+        statusEl.style.color = '#F87171';
+      } else {
+        statusEl.innerText = `Keep going! Need ${target - currentSum} more.`;
+        statusEl.style.color = 'var(--text-muted)';
+      }
+    }
+  </script>
+</body>
+</html>
